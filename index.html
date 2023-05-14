@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>OpenAI Chatbot Example</title>
+    <script src="https://cdn.jsdelivr.net/npm/@openai/api@0.6.3/dist/openai-api.min.js"></script>
+  </head>
+  <body>
+    <h1>OpenAI Chatbot Example</h1>
+    <div id="chatbot"></div>
+    <script>
+      import OpenAI from '@openai/api';
+      
+      const openai = new OpenAI('YOUR_API_KEY_HERE');
+      const chatbot = document.getElementById('chatbot');
+      
+      // function to create a chat bubble
+      function createChatBubble(message, sender) {
+        const bubble = document.createElement('div');
+        bubble.classList.add('chat-bubble');
+        bubble.classList.add(sender);
+        bubble.textContent = message;
+        chatbot.appendChild(bubble);
+      }
+      
+      // function to send a message to the OpenAI API
+      async function sendMessage(message) {
+        const response = await openai.complete({
+          engine: 'davinci',
+          prompt: message,
+          maxTokens: 150,
+          n: 1,
+          stop: '\n',
+          temperature: 0.5,
+        });
+        return response.choices[0].text.trim();
+      }
+      
+      // function to handle user input
+      async function handleInput(event) {
+        if (event.key === 'Enter') {
+          const userInput = event.target.value;
+          event.target.value = '';
+          createChatBubble(userInput, 'user');
+          const botResponse = await sendMessage(userInput);
+          createChatBubble(botResponse, 'bot');
+        }
+      }
+      
+      // add event listener to input field
+      const inputField = document.createElement('input');
+      inputField.type = 'text';
+      inputField.placeholder = 'Type your message here and press Enter...';
+      inputField.addEventListener('keydown', handleInput);
+      chatbot.appendChild(inputField);
+    </script>
+    <style>
+      #chatbot {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        justify-content: flex-end;
+        padding: 20px;
+      }
+      .chat-bubble {
+        background-color: #eee;
+        border-radius: 20px;
+        max-width: 80%;
+        padding: 10px 20px;
+        margin: 10px 0;
+        word-wrap: break-word;
+      }
+      .user {
+        align-self: flex-end;
+        background-color: #aaf;
+      }
+      .bot {
+        align-self: flex-start;
+        background-color: #faa;
+      }
+    </style>
+  </body>
+</html>
